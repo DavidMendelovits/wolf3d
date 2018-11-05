@@ -6,7 +6,7 @@
 #    By: dmendelo <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/11/05 11:04:04 by dmendelo          #+#    #+#              #
-#    Updated: 2018/11/05 11:33:04 by dmendelo         ###   ########.fr        #
+#    Updated: 2018/11/05 13:26:40 by dmendelo         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,6 +18,7 @@ SRC_DIR = src
 SRC = wolf3d
 
 INC = -I inc -I libft/ -I mlx/
+FRAMEWORK = -framework OpenGl -framework AppKit
 
 OBJ_DIR = $(SRC_DIR)/obj
 OBJ = $(patsubst %, $(OBJ_DIR)/%.o, $(SRC))
@@ -28,7 +29,7 @@ all: $(NAME)
 
 $(NAME): $(LIBFT) $(MLX) $(OBJ) 
 		@printf "\nCompiling wolf3d\n"
-		@gcc $(CFLAGS) $(LIBFT) $(MLX) $(OBJ) -o $(NAME)
+		@gcc $(CFLAGS) $(LIBFT) $(MLX) $(OBJ) $(FRAMEWORK) -o $(NAME)
 		@echo "Done!\n"
 
 $(LIBFT):
