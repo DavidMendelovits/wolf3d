@@ -6,7 +6,7 @@
 /*   By: dmendelo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/05 11:23:24 by dmendelo          #+#    #+#             */
-/*   Updated: 2018/11/06 16:52:09 by dmendelo         ###   ########.fr       */
+/*   Updated: 2018/11/07 14:35:49 by dmendelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,7 +129,7 @@ int				validate_map(t_map **map, int fd)
 		line = NULL;
 	}
 	map_[p] = NULL;
-	printf("start at [%d][%d]\n", (*map)->start.y, (*map)->start.x);
+	printf("start at [%f][%f]\n", (*map)->start.y, (*map)->start.x);
 	ft_print_strings(map_);
 	return (1);
 }
@@ -143,6 +143,7 @@ t_map			*read_validate_map(char *filename)
 	if (fd < 0)
 		return (NULL);
 	map = init_map();
+	
 	if (!read_validate_first_line(&map, fd))
 		return (NULL);
 	printf("map->width = %d\nmap->height = %d\n", map->width, map->height);
@@ -163,10 +164,89 @@ t_player		*init_player(t_map *map)
 	return (player);
 }
 
+t_mlx			*init(void)
+{
+	t_mlx				*m;
+
+	m = malloc(sizeof(*m));
+	m->mlx = mlx_init();
+	m->size.x = 1000;
+	m->size.y = 1000;
+	return (m);
+}
+
+void			color_pixel(t_mlx *m, int x, int y, int color)
+{
+	m->img_int[y * m->size_line + x * m->bpp] = color;
+	m->img_int[y * m->size_line + x * m->bpp + 1] = color >> 8;
+	m->img_int[y * m->size_line + x * m->bpp + 2] = color >> 16;
+}
+
+void			new_image(t_mlx *m, int color)
+{
+	m->img_ptr = mlx_new_image(m->mlx, 1000, 1000);
+	m->img_int = mlx_get_data_addr(m->img_ptr, &m->bpp, &m->size_line, &m->endian); 
+	m->bpp /= 8;
+	printf("img address -> %p\n", m->img_int);
+	printf("size_line = %d\n", m->size_line);
+	printf("bpp = %d\n", m->bpp);
+	m->color = mlx_get_color_value(m->mlx, color);
+	printf("color value = %u\n", m->color);
+	printf("size.x = %f\nsize.y = %f\n", m->size.x, m->size.y);
+	for (int i = 0; i < m->size.y; i++)
+	{
+		for (int j = 0; j < m->size.x; j++)
+		{
+			color_pixel(m, j, i, m->color);
+		}
+	}
+	mlx_put_image_to_window(m->mlx, m->window, m->img_ptr, 0, 0);
+}
+
+void			new_background(t_mlx *m)
+{
+	static int				color = 0xfffafa;
+
+	new_image(m, color);
+	color += 10;
+}
+
+int				key_press_hook(int keycode, t_mlx *m)
+{
+	printf("keycode = %d\n", keycode);
+	if (keycode == 53)
+		exit(1);
+	if (keycode == 49)
+	{
+		new_background(m);
+	}
+	if (m->mlx)
+		printf("-----------------\n");
+	return (0);
+}
+
+void			set_hooks(t_mlx *m)
+{
+	mlx_hook(m->window, 2, 0, key_press_hook, m);
+//	mlx_hook(m->window, 6, 0, mouse_motion_hook, m);
+}
+
+void			screenplay(void)
+{
+	t_mlx				*m;
+
+	m = init();
+	m->window = mlx_new_window(m->mlx, 1000, 1000, "newnew");
+//	new_image(m);
+	set_hooks(m);
+	mlx_loop(m->mlx);
+}
+
 void			wolf3d(char *mapname)
 {
 	t_map				*map;
-	t_player			*player;
+//	t_player			*player;
+	
 
 	map = read_validate_map(mapname);
 	if (!map)
@@ -174,7 +254,8 @@ void			wolf3d(char *mapname)
 		write(2, MAP_ERROR, sizeof(MAP_ERROR));
 		return ;
 	}
-	player = init_player(map);
+//	player = init_player(map);
+	screenplay();
 }
 
 int				main(int argc, char **argv)
