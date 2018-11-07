@@ -6,7 +6,7 @@
 /*   By: dmendelo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/05 11:23:24 by dmendelo          #+#    #+#             */
-/*   Updated: 2018/11/06 14:09:18 by dmendelo         ###   ########.fr       */
+/*   Updated: 2018/11/06 16:52:09 by dmendelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,6 +85,55 @@ int				read_validate_first_line(t_map **map, int fd)
 	return (1);
 }
 
+int				validate_line(char *line, t_map **map)
+{
+	int					p;
+	static int 			line_num = 0;
+
+	p = 0;
+	while (line[p])
+	{
+		if (line[p] == 'S')
+		{
+			(*map)->start.x = p;
+			(*map)->start.y = line_num;
+		}
+		else if (line[p] != '0' && line[p] != '1')
+		{
+			return (0);
+		}
+		p += 1;
+	}
+	line_num += 1;
+	if (p != (*map)->width)
+		return (0);
+	return (1);
+}
+
+int				validate_map(t_map **map, int fd)
+{
+	char				*line;
+	char				**map_;
+	int					p;
+
+	line = NULL;
+	map_ = (char **)malloc(sizeof(char *) * ((*map)->height + 1));
+	p = 0;
+	while (get_next_line(fd, &line) == 1)
+	{
+		if (!validate_line(line, map))
+			return (0);
+		map_[p] = ft_strdup(line);
+		p += 1;
+		free(line);
+		line = NULL;
+	}
+	map_[p] = NULL;
+	printf("start at [%d][%d]\n", (*map)->start.y, (*map)->start.x);
+	ft_print_strings(map_);
+	return (1);
+}
+
 t_map			*read_validate_map(char *filename)
 {
 	t_map				*map;
@@ -97,12 +146,27 @@ t_map			*read_validate_map(char *filename)
 	if (!read_validate_first_line(&map, fd))
 		return (NULL);
 	printf("map->width = %d\nmap->height = %d\n", map->width, map->height);
+	if (!validate_map(&map, fd))
+		return (NULL);
 	return (map);
+}
+
+t_player		*init_player(t_map *map)
+{
+	t_player			*player;
+
+	player = malloc(sizeof(*player));
+	player->position.y = map->start.y;
+	player->position.x = map->start.x;
+	player->direction.x = -1;
+	player->direction.y = 0;
+	return (player);
 }
 
 void			wolf3d(char *mapname)
 {
 	t_map				*map;
+	t_player			*player;
 
 	map = read_validate_map(mapname);
 	if (!map)
@@ -110,6 +174,7 @@ void			wolf3d(char *mapname)
 		write(2, MAP_ERROR, sizeof(MAP_ERROR));
 		return ;
 	}
+	player = init_player(map);
 }
 
 int				main(int argc, char **argv)
