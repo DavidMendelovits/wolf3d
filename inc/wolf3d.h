@@ -6,7 +6,7 @@
 /*   By: dmendelo <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/11/05 11:24:11 by dmendelo          #+#    #+#             */
-/*   Updated: 2018/11/07 14:26:49 by dmendelo         ###   ########.fr       */
+/*   Updated: 2018/11/07 20:53:01 by dmendelo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 # define USAGE "wolf3d -> Usage:\n./wolf3d [map]\n"
 # define MAP_ERROR "Invalid Map!\n"
-
+# define INBOUNDS(x, y, (void *)) {
 typedef struct		s_point
 {
 	double				x;
